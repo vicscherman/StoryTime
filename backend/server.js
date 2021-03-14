@@ -6,7 +6,7 @@ const cors = require("cors");
 //set back end port to 5000 or whatever it ends up being when deployed
 const PORT = process.env.PORT || 5000;
 
-const { addUser, getUser, deleteUser, getUsers } = require("./users");
+const { addUser, getUser, deleteUser, getUsers , users} = require("./users");
 
 //initialize socket, pass the http const to it
 const io = require("socket.io")(http);
@@ -17,8 +17,10 @@ app.use(cors());
 //SOCKET STUFF
 //invoke on method w/ connection as the event name, and a callback. Callback holds that socket instance to listen to/emit events
 io.on("connection", (socket) => {
+  
   //3 events to listen for, logging in, sending messages, disconnecting
   socket.on("login", ({ name, room }, callback) => {
+    console.log(`${users.length}`)
     const { user, error } = addUser(socket.id, name, room);
     if (error) return callback(error);
     //join the specified room

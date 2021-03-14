@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react'
+import React, { useContext,  useEffect } from 'react'
 //for switching
 import { useHistory } from 'react-router-dom'
 //context providers for username, room name
@@ -49,7 +49,7 @@ const Login = () => {
                 title: "Hey there",
                 description: `Welcome to StoryTime! The rules are simple. You have 10 seconds to type, once that's up, the next user gets a chance! `,
                 status: "success",
-                duration: 5000,
+                duration: null,
                 isClosable: true,
             })
         })
