@@ -1,0 +1,31 @@
+.form{
+    position: relative;
+    z-index: 1000;
+    input{
+        width:100%;
+        padding: 1.5 rem;
+        border-radius: 0 px 0 px 10px 10px
+    }
+}
+
+.messages{
+    background:white;
+    .message{
+        .msg{
+            color: rgba(0, 0, 0, 0.7);
+        }
+    }
+
+
+}
+
+.messages > div{
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    width: auto !important;
+    overflow:auto;
+    min-height:400px;
+    max-height:400px;
+    padding: 1rem;
+}

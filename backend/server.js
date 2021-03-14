@@ -42,7 +42,17 @@ io.on("connection", (socket) => {
   socket.on("sendMessage", (message) => {
     const user = getUser(socket.id);
     io.in(user.room).emit("message", { user: user.name, text: message });
+    console.log(message)
   });
+
+  socket.on("updateMessage", (message) => {
+    const user = getUser(socket.id);
+    io.in(user.room).emit('message-updated', { text: message });
+    // const user = getUser(socket.id);
+    // io.in(user.room).emit("message", { user: user.name, text: message });
+    // console.log(message)
+  });
+
   // delete user through socket id, emit a notification event to the other users, update the list of users in the room
   socket.on("disconnect", () => {
     console.log("user disconnected");
