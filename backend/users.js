@@ -34,7 +34,7 @@ const deleteUser = (id) => {
 
 const getUsers = (room) => users.filter((user) => user.room === room);
 
-//to check if our room is full. If the room exists and the length of the users array > 5 we  return
+
 
 
 module.exports = { addUser, getUser, deleteUser, getUsers };
