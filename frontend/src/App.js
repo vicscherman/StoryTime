@@ -6,9 +6,9 @@ import { MainProvider } from "./mainContext";
 import "./App.css";
 import { ChakraProvider, Flex } from "@chakra-ui/react";
 import { UsersProvider } from "./usersContext";
-import DefaultPage from "./components/DefaultPage";
+import ErrorPage from "./components/ErrorPage";
 
-
+//chakra is basically nice UI styling elements for this
 //Main Provider holds username and room name
 //Users provider holds users present in a room
 //Socket Provider holds socket instance
@@ -25,7 +25,7 @@ function App() {
                 <Switch>
                   <Route exact path="/" component={Login} />
                   <Route exact path="/storytime" component={StoryTime} />
-                  <Route  component={DefaultPage} />
+                  <Route  component={ErrorPage} />
                 </Switch>
               </Router>
             </Flex>

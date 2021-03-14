@@ -49,7 +49,7 @@ const Login = () => {
                 title: "Hey there",
                 description: `Welcome to StoryTime! The rules are simple. You have 10 seconds to type, once that's up, the next user gets a chance! `,
                 status: "success",
-                duration: null,
+                duration: 10000,
                 isClosable: true,
             })
         })

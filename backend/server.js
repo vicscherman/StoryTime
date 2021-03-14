@@ -20,9 +20,11 @@ io.on("connection", (socket) => {
   
   //3 events to listen for, logging in, sending messages, disconnecting
   socket.on("login", ({ name, room }, callback) => {
-    console.log(`${users.length}`)
+  
     const { user, error } = addUser(socket.id, name, room);
     if (error) return callback(error);
+    console.log(`${users.length}`)
+    console.log(users)
     //join the specified room
     socket.join(user.room);
     //send notification to room of joined user
@@ -51,6 +53,9 @@ io.on("connection", (socket) => {
         description: `${user.name} just left StoryTime`,
       });
       io.in(user.room).emit("users", getUsers(user.room));
+      console.log("Here are the users left in chat", users)
+      console.log("Number of remaining users is ", users.length)
+     
     }
   });
 });
