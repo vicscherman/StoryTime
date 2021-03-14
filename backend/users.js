@@ -11,8 +11,9 @@ const addUser = (id, name, room) => {
   //conditions for logging in with error messages
   if (userExists) return { error: "User already exists!" };
   if (!name && !room) return { error: "You need to input a room and username" };
-  if (!name || !room)
-    return { error: "Make sure to put in your username or room name" };
+  if (!name || !room) return { error: "Make sure to put in your username or room name" };
+  //to check if our room is full/set max players for game. If the room exists and the length of the users array > 5 we  return error
+  if (room && users.length > 5) return {error: "Sorry that room is full!"}
   //define our user, push it to users array, return user
   const user = { id, name, room };
   users.push(user);
@@ -34,8 +35,6 @@ const deleteUser = (id) => {
 const getUsers = (room) => users.filter((user) => user.room === room);
 
 //to check if our room is full. If the room exists and the length of the users array > 5 we  return
-const roomFull = (room) => {
-  if (room && users.length > 5) return { error: "Sorry that room is full!" };
-};
 
-module.exports = { addUser, getUser, deleteUser, getUsers, roomFull };
+
+module.exports = { addUser, getUser, deleteUser, getUsers };

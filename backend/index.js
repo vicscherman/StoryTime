@@ -6,7 +6,7 @@ const cors = require('cors')
 //set back end port to 5000 or whatever it ends up being when deployed
 const PORT = process.env.PORT || 5000
 
-const {addUser,getUser, deleteUser, getUsers, roomFull} =require('./users') 
+const {addUser,getUser, deleteUser, getUsers} =require('./users') 
 
 
 //initialize socket, pass the http const to it
