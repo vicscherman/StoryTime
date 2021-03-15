@@ -16,18 +16,22 @@ app.use(cors());
 
 //for selecting the user that gets to type
 let chosenUser = 0;
-setInterval(() => {
-  if (users.length == 0) {
-    return;
-  }
-  chosenUser++;
-  if (chosenUser >= users.length) {
-    chosenUser = 0;
-  }
-  console.log("Chosen user is", chosenUser);
-  console.log(users[chosenUser]);
-  io.in(users[chosenUser].room).emit("chosenUser", users[chosenUser].name);
-}, 10000);
+
+ 
+
+  setInterval(() => {
+    if (users.length == 0) {
+      return;
+    }
+    chosenUser++;
+    if (chosenUser >= users.length) {
+      chosenUser = 0;
+    }
+    console.log("Chosen user is", chosenUser);
+    console.log(users[chosenUser]);
+    io.in(users[chosenUser].room).emit("chosenUser", users[chosenUser].name);
+  }, 10000);
+
 
 //SOCKET STUFF
 //invoke on method w/ connection as the event name, and a callback. Callback holds that socket instance to listen to/emit events

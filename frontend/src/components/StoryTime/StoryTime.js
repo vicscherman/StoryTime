@@ -34,7 +34,8 @@ const StoryTime = () => {
   //for determining which is the current active user
   const [activeMessage, setActiveMessage] = useState({ user: "", text: "" });
   //for disabling the ability to type for users when it's not their turn
-  const [disableInputBox, setDisableInputBox] = useState(true)
+  const [disableInputBox, setDisableInputBox] = useState(true);
+  const [chosenName, setChosenName] = useState("");
   const socket = useContext(SocketContext);
   const toast = useToast();
 
@@ -49,8 +50,8 @@ const StoryTime = () => {
       // commit active message & then clear it
       console.log(`[sendMessage] new msg (${message.text})`, message);
       messages.push(message);
-      console.log("useEffect messags",messages)
-      setActiveMessage({user:"", text: ""});
+      console.log("useEffect messags", messages);
+      setActiveMessage({ user: "", text: "" });
       setMessages([...messages]);
     });
 
@@ -61,8 +62,8 @@ const StoryTime = () => {
 
     socket.on("chosenUser", (chosenName) => {
       console.log(`chosen user is (${chosenName})`);
-      setDisableInputBox( name=== chosenName ? false : true)
-      
+      setDisableInputBox(name === chosenName ? false : true);
+      setChosenName(chosenName);
     });
 
     socket.on("notification", (notif) => {
@@ -86,7 +87,6 @@ const StoryTime = () => {
 
   const handleSendMessage = () => {
     socket.emit("sendMessage", { user: name, text: message });
-    
   };
 
   const handleUpdateMessage = (e) => {
@@ -101,15 +101,26 @@ const StoryTime = () => {
     <Flex
       className="room"
       flexDirection="column"
-      width={{ base: "100%", sm: "575px" }}
+      width={{ base: "100%", sm: "700px" }}
       height={{ base: "100%", sm: "auto" }}
     >
+      <Heading
+        className="chosenuser"
+        align="center"
+        as="h4"
+        bg="white"
+        p="1rem 1.5 rem"
+        borderRadius="10px 10px 0px 0px"
+      >
+      {chosenName ? `It's ${chosenName}'s turn to type!` : ''}
+      </Heading>
+
       <Heading
         className="heading"
         as="h4"
         bg="white"
         p="1rem 1.5rem"
-        borderRadius="10px 10px 0 0"
+        borderRadius="0px 0px 0 0"
       >
         <Flex alignItems="center" justifyContent="space-between">
           <Menu>
@@ -117,7 +128,7 @@ const StoryTime = () => {
               as={IconButton}
               icon={<FiList />}
               isRound="true"
-              bg="blue.300"
+              bg="red"
               color="white"
             />
             <MenuList>
@@ -218,6 +229,7 @@ const StoryTime = () => {
           isRound="true"
           icon={<RiSendPlaneFill />}
           onClick={handleSendMessage}
+          onSubmit={handleSendMessage}
           disabled={disableInputBox || message === "" ? true : false}
         >
           Send
