@@ -14,23 +14,9 @@ const io = require("socket.io")(http);
 //use cors for the app
 app.use(cors());
 
-//for selecting the user that gets to type
-let chosenUser = 0;
+
 
  
-
-  setInterval(() => {
-    if (users.length == 0) {
-      return;
-    }
-    chosenUser++;
-    if (chosenUser >= users.length) {
-      chosenUser = 0;
-    }
-    console.log("Chosen user is", chosenUser);
-    console.log(users[chosenUser]);
-    io.in(users[chosenUser].room).emit("chosenUser", users[chosenUser].name);
-  }, 10000);
 
 
 //SOCKET STUFF
@@ -51,7 +37,31 @@ io.on("connection", (socket) => {
     //we update the users list in the room
     io.in(room).emit("users", getUsers(room));
     callback();
+    //for having the game start at 5 users.
+    if (users.length ==5){
+      let chosenUser = 0;
+
+      setInterval(() => {
+        if (users.length == 0) {
+          return;
+        }
+        chosenUser++;
+        if (chosenUser >= users.length) {
+          chosenUser = 0;
+        }
+        console.log("Chosen user is", chosenUser);
+        console.log(users[chosenUser]);
+        //for passing to the front end a chosen user. we'll use this to disable/enable typing for users
+        io.in(users[chosenUser].room).emit("chosenUser", users[chosenUser].name);
+      }, 10000);
+    }
+
   });
+
+
+  
+ 
+
 
   //take message from client end and emit message event with the user's name and the message they're sending
   socket.on("sendMessage", (message) => {
@@ -79,8 +89,9 @@ io.on("connection", (socket) => {
         title: "Someone left",
         description: `${user.name} just left StoryTime`,
       });
-      clearInterval();
+     
       io.in(user.room).emit("users", getUsers(user.room));
+      clearInterval();
       console.log("Here are the users left in chat", users);
       console.log("Number of remaining users is ", users.length);
     }
