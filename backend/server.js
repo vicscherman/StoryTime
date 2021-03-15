@@ -6,7 +6,7 @@ const cors = require("cors");
 //set back end port to 5000 or whatever it ends up being when deployed
 const PORT = process.env.PORT || 5000;
 
-const { addUser, getUser, deleteUser, getUsers , users} = require("./users");
+const { addUser, getUser, deleteUser, getUsers, users } = require("./users");
 
 //initialize socket, pass the http const to it
 const io = require("socket.io")(http);
@@ -14,43 +14,56 @@ const io = require("socket.io")(http);
 //use cors for the app
 app.use(cors());
 
+//for selecting the user that gets to type
+let chosenUser = 0;
+setInterval(() => {
+  if (users.length == 0) {
+    return;
+  }
+  chosenUser++;
+  if (chosenUser >= users.length) {
+    chosenUser = 0;
+  }
+  console.log("Chosen user is", chosenUser);
+  console.log(users[chosenUser]);
+  io.in(users[chosenUser].room).emit("chosenUser", users[chosenUser].name);
+}, 10000);
+
 //SOCKET STUFF
 //invoke on method w/ connection as the event name, and a callback. Callback holds that socket instance to listen to/emit events
 io.on("connection", (socket) => {
-  
   //3 events to listen for, logging in, sending messages, disconnecting
   socket.on("login", ({ name, room }, callback) => {
-  
     const { user, error } = addUser(socket.id, name, room);
     if (error) return callback(error);
-    console.log(`${users.length}`)
-    console.log(users)
+    console.log("these are the users", users);
     //join the specified room
     socket.join(user.room);
     //send notification to room of joined user
-    socket
-      .in(room)
-      .emit("notification", {
-        title: "Someone's joined",
-        description: `${user.name} has just joined StoryTime!`,
-      });
+    socket.in(room).emit("notification", {
+      title: "Someone's joined",
+      description: `${user.name} has just joined StoryTime!`,
+    });
     //we update the users list in the room
     io.in(room).emit("users", getUsers(room));
     callback();
   });
+
   //take message from client end and emit message event with the user's name and the message they're sending
   socket.on("sendMessage", (message) => {
     const user = getUser(socket.id);
-    io.in(user.room).emit("message", { user: user.name, text: message });
-    console.log(message)
+    console.log(`[sendMessage] received: '${message}' from user(${user})`);
+    io.in(user.room).emit("sendMessage", message);
+    console.log("sent message", message);
   });
 
   socket.on("updateMessage", (message) => {
     const user = getUser(socket.id);
-    io.in(user.room).emit('message-updated', { text: message });
-    // const user = getUser(socket.id);
-    // io.in(user.room).emit("message", { user: user.name, text: message });
-    // console.log(message)
+    console.log(
+      `[updateMessage] received: '${message.text}' from user(${message.user})`
+    );
+    io.in(user.room).emit("updateMessage", message);
+    console.log("updated message", message);
   });
 
   // delete user through socket id, emit a notification event to the other users, update the list of users in the room
@@ -62,10 +75,10 @@ io.on("connection", (socket) => {
         title: "Someone left",
         description: `${user.name} just left StoryTime`,
       });
+      clearInterval();
       io.in(user.room).emit("users", getUsers(user.room));
-      console.log("Here are the users left in chat", users)
-      console.log("Number of remaining users is ", users.length)
-     
+      console.log("Here are the users left in chat", users);
+      console.log("Number of remaining users is ", users.length);
     }
   });
 });

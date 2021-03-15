@@ -27,57 +27,55 @@ const StoryTime = () => {
   const { name, room, setName, setRoom } = useContext(MainContext);
   const { users } = useContext(UsersContext);
   const history = useHistory();
+  //for logging the message box
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState([])
+  //for rendering in main box
+  const [messages, setMessages] = useState([]);
+  //for determining which is the current active user
+  const [activeMessage, setActiveMessage] = useState({ user: "", text: "" });
+  //for disabling the ability to type for users when it's not their turn
+  const [disableInputBox, setDisableInputBox] = useState(true)
   const socket = useContext(SocketContext);
-  const toast = useToast()
+  const toast = useToast();
 
-  window.onpopstate = e => logout()
-  //Checks to see if there's a user present
-  useEffect(() => { if (!name) return history.push('/') }, [history, name])
-
-
+  window.onpopstate = (e) => logout();
+  //Checks to see if there's a user present to log in
+  useEffect(() => {
+    if (!name) return history.push("/");
+  }, [history, name]);
 
   useEffect(() => {
-    socket.on("message", msg => {
-        setMessages(messages => [...messages, msg]);
-    })
+    socket.on("sendMessage", (message) => {
+      // commit active message & then clear it
+      console.log(`[sendMessage] new msg (${message.text})`, message);
+      messages.push(message);
+      console.log("useEffect messags",messages)
+      setActiveMessage({user:"", text: ""});
+      setMessages([...messages]);
+    });
 
-    socket.on("message-updated", msg => {
-      
-      //doobly is clone of messages, doobly is takes last message and updates it with whatever is in the text box
-        setMessages(messages => {
-          if(messages.length > 0) {
-            const messageClone = [...messages];
-            messageClone.splice(messageClone.length - 1, 1, {
-              user: messageClone[messageClone.length - 1].user,
-              text: msg.text,
-            })
+    socket.on("updateMessage", (message) => {
+      console.log(`[updateMessage] msg(${message.text})`);
+      setActiveMessage({ ...message });
+    });
 
-            return [...messageClone]
-          }
-          
-          return [...messages]
-        })
+    socket.on("chosenUser", (chosenName) => {
+      console.log(`chosen user is (${chosenName})`);
+      setDisableInputBox( name=== chosenName ? false : true)
       
     });
 
-    socket.on("notification", notif => {
-        toast({
-            position: "top",
-            title: notif?.title,
-            description: notif?.description,
-            status: "success",
-            duration: 5000,
-            isClosable: true,
-        })
-    })
-}, [socket, toast])
-
-  
-
-
-  
+    socket.on("notification", (notif) => {
+      toast({
+        position: "top",
+        title: notif?.title,
+        description: notif?.description,
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+    });
+  }, [socket, toast]);
 
   const logout = () => {
     setName("");
@@ -87,15 +85,17 @@ const StoryTime = () => {
   };
 
   const handleSendMessage = () => {
-    socket.emit("sendMessage", message, () => setMessage(""));
-    setMessage("");
-   
+    socket.emit("sendMessage", { user: name, text: message });
+    
   };
 
-  const handleUpdateYa = (e) => {
-    socket.emit("updateMessage", e.target.value);
-    setMessage(e.target.value)
-  }
+  const handleUpdateMessage = (e) => {
+    // update active message with the latest character:
+    let newMessage = e.target.value;
+    console.log("Handleupdatemessage", newMessage);
+    socket.emit("updateMessage", { user: name, text: newMessage });
+    setMessage(e.target.value);
+  };
 
   return (
     <Flex
@@ -199,21 +199,26 @@ const StoryTime = () => {
             <Box ml="2">-----</Box>
           </Flex>
         )}
+        <div>
+          {activeMessage.text.length > 0
+            ? `${activeMessage.user} is typing: ${activeMessage.text}`
+            : ""}
+        </div>
       </ScrollToBottom>
       <div className="form">
         <input
           type="text"
           placeholder="Enter Message"
           value={message}
-          onChange={(e) => handleUpdateYa(e)}
-          
+          disabled={disableInputBox}
+          onChange={(e) => handleUpdateMessage(e)}
         />
         <IconButton
           colorScheme="green"
           isRound="true"
           icon={<RiSendPlaneFill />}
           onClick={handleSendMessage}
-          disabled={message === "" ? true : false}
+          disabled={disableInputBox || message === "" ? true : false}
         >
           Send
         </IconButton>
@@ -221,6 +226,5 @@ const StoryTime = () => {
     </Flex>
   );
 };
-
 
 export default StoryTime;
